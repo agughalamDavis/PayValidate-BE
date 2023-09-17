@@ -9,21 +9,26 @@ class Payment(BaseModel):
     card_name: str
     card_number: str
     cvv: str
-    expiry_date: date
+    expiry_date: str
 
     @root_validator(pre=True)
     @classmethod
     def validate_expiry_date(cls, values):
         expiry_date = values.get("expiry_date")
-        today = datetime.today()
-        date_format = '%Y-%m-%d'
+        
         try:
-            expiry_date = datetime.strptime(expiry_date, date_format)
-        except Exception:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid Date Format! Please use Y-m-d")
+            formatted_date = datetime.strptime(expiry_date, "%Y-%m") 
+        except:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid date format. Please use YYYY-mm!")
 
-        if expiry_date < today :
+        year_today, month_today = datetime.today().year, datetime.today().month
+        year, month = formatted_date.year, formatted_date.month
+
+        if int(year) > year_today:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Card has expired!")
+        elif  int(year) <= year_today and int(month) < month_today:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Card has expired!")
+
         
         return values
 
@@ -37,7 +42,7 @@ class Payment(BaseModel):
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid Card Number!")
 
 
-        #luhn algorithm
+        #luhn's algorithm
         check_digit = card_number[-1]
         if int(check_digit) != luhns_algorithm(card_number=card_number):
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid Card Number!")

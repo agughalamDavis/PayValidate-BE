@@ -1,18 +1,24 @@
-from typing import Union
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from validation_schema import Payment
 
 app = FastAPI()
 
 
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/payment/validate")
 def validate_payment(
     payload: Payment,
 ):
-    #body
+    #API BODY
     
     return {"message": "Payment Details Validated Successfully", "data": payload}
     
