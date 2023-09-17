@@ -1,5 +1,3 @@
-
-
 def add_digits(digit) -> int:
     sum = 0
     digit = str(digit)
